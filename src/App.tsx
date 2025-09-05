@@ -17,11 +17,11 @@ export interface ComponentItem {
 
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('全部')
 
-  const categories = ['all', ...Array.from(new Set(components.map(c => c.category)))]
+  const categories = ['全部', ...Array.from(new Set(components.map(c => c.category)))]
   
-  const filteredComponents = selectedCategory === 'all' 
+  const filteredComponents = selectedCategory === '全部' 
     ? components 
     : components.filter(c => c.category === selectedCategory)
 
@@ -35,11 +35,11 @@ function App() {
       </header>
 
       <nav className="sticky top-0 z-10 px-4">
-        <div className="flex gap-4 bg-wihte opacity-90 backdrop-blur-lg h-12">
+        <div className="flex gap-2 bg-wihte opacity-90 backdrop-blur-lg h-12">
           {categories.map(category => (
             <button
               key={category}
-              className={`px-4 py-2 rounded-lg transition-colors ${selectedCategory === category ? 'font-bold' : ''}`}
+              className={`px-4 py-2 rounded-lg transition-colors cursor-pointer ${selectedCategory === category ? 'font-bold' : ''}`}
               onClick={() => setSelectedCategory(category)}
             >
               {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -49,7 +49,7 @@ function App() {
       </nav>
 
       <main className="px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {filteredComponents.map((component) => (
             <div
               key={component.id}
