@@ -90,6 +90,24 @@ export const components: ComponentItem[] = [
     date: "2025-09-07",
     tags: ["button", "transform"],
     component: <MoreCloseIcon />,
-    originLink: "https://layrid.tomoyaokada.com/",
+    originLink: "https://layrid.tomoyaokada.com/"
   },
+  {
+    id: "slash-background",
+    title: "Slash Background",
+    category: "样式",
+    date: "2025-09-08",
+    tags: ["background"],
+    component: <div className="w-full h-full bg-[size:8px_8px] bg-top-left text-black/10 bg-[image:repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)]"  />,
+    originLink: "https://tailwindcss.com/"
+  },
+  {
+    id: 'dot-background',
+    title: 'Dots Background',
+    category: '样式',
+    date: '2025-09-08',
+    tags: ['background'],
+    component: <div className="w-full h-full p-4 sm:p-8 relative overflow-hidden rounded-lg bg-[image:radial-gradient(var(--pattern-fg)_1px,_transparent_0)] bg-[size:10px_10px] bg-fixed [--pattern-fg:var(--color-gray-950)]/5 dark:[--pattern-fg:var(--color-white)]/10"></div>,
+    originLink: "https://tailwindcss.com/"
+  }
 ];
