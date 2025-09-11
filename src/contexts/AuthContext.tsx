@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '../../supaClient';
 
-// Mock user type
+// User type based on Supabase Auth
 interface User {
   id: string;
   email: string;
   user_metadata?: {
     username?: string;
     avatar_url?: string;
+    sex?: string;
+    is_official?: boolean;
   };
 }
 
@@ -36,67 +38,144 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 模拟检查本地存储的用户信息
-    const savedUser = localStorage.getItem('mockUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    // 获取当前用户会话
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          user_metadata: session.user.user_metadata
+        });
+      }
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            user_metadata: session.user.user_metadata
+          });
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    // 模拟登录验证
-    if (email && password) {
-      const mockUser: User = {
-        id: uuidv4(),
-        email: email,
-        user_metadata: {
-          username: email.split('@')[0],
-        }
-      };
-      setUser(mockUser);
-      localStorage.setItem('mockUser', JSON.stringify(mockUser));
-      return { success: true };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          user_metadata: data.user.user_metadata
+        });
+        return { success: true };
+      }
+
+      return { success: false, error: '登录失败' };
+    } catch (error) {
+      return { success: false, error: '网络错误，请稍后重试' };
     }
-    return { success: false, error: '邮箱或密码不能为空' };
   };
 
   const signUp = async (email: string, password: string, userData?: any) => {
-    // 模拟注册
-    if (email && password) {
-      const mockUser: User = {
-        id: uuidv4(),
-        email: email,
-        user_metadata: {
-          username: userData?.username || email.split('@')[0],
-          avatar_url: userData?.avatar_url,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: userData?.username || email.split('@')[0],
+            avatar_url: userData?.avatar_url,
+            sex: userData?.sex,
+            is_official: userData?.is_official || false,
+          }
         }
-      };
-      setUser(mockUser);
-      localStorage.setItem('mockUser', JSON.stringify(mockUser));
-      return { success: true };
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        // 注册成功，但可能需要邮箱验证
+        if (!data.session) {
+          return { 
+            success: true, 
+            error: '注册成功！请检查您的邮箱并点击验证链接来激活账户。' 
+          };
+        }
+        
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          user_metadata: data.user.user_metadata
+        });
+        return { success: true };
+      }
+
+      return { success: false, error: '注册失败' };
+    } catch (error) {
+      return { success: false, error: '网络错误，请稍后重试' };
     }
-    return { success: false, error: '邮箱或密码不能为空' };
   };
 
   const signOut = async () => {
-    setUser(null);
-    localStorage.removeItem('mockUser');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+      setUser(null);
+    } catch (error) {
+      console.error('Sign out error:', error);
+      setUser(null);
+    }
   };
 
   const updateUser = async (updates: any) => {
-    if (user) {
-      const updatedUser = {
-        ...user,
-        user_metadata: {
-          ...user.user_metadata,
-          ...updates
-        }
-      };
-      setUser(updatedUser);
-      localStorage.setItem('mockUser', JSON.stringify(updatedUser));
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: updates
+      });
+
+      if (error) {
+        console.error('Update user error:', error);
+        return;
+      }
+
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          user_metadata: data.user.user_metadata
+        });
+      }
+    } catch (error) {
+      console.error('Update user error:', error);
     }
   };
 

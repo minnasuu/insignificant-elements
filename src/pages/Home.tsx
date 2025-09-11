@@ -88,7 +88,7 @@ export default function Home() {
       {user && (
         <div className="px-4 py-2 bg-blue-50">
           <p className="text-sm text-blue-600">
-            欢迎回来，{user.email}！
+            欢迎回来，{user.user_metadata?.username}！
           </p>
         </div>
       )}

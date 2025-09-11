@@ -1,5 +1,4 @@
 import { supabase } from '../../supaClient';
-import { useAuth } from '../contexts/AuthContext';
 import type { ComponentItem } from '../types';
 
 // 获取所有组件数据

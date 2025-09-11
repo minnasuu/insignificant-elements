@@ -26,12 +26,7 @@ export default function Header({ title, description }: HeaderProps) {
           {loading ? (
             <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
           ) : user ? (
-            <UserAvatar user={{
-              id: user.id,
-              email: user.email,
-              username: user.user_metadata?.username,
-              avatar_url: user.user_metadata?.avatar_url
-            }} onLogout={handleLogout} />
+            <UserAvatar user={user} onLogout={handleLogout} />
           ) : (
             <LoginButtons
               onLoginClick={() => setShowLoginDialog(true)}
