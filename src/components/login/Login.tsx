@@ -51,14 +51,14 @@ const Login: React.FC<Props> = ({
       <LandLoading />
       登录中...
     </div> : <div className={`flex flex-col gap-3 ${loginLoading ? 'events-none' : ''}`}>
-      <LandInput type={'border'} width={'100%'} prefix={'邮箱：'} name={'email'} onChange={val => {
+      <LandInput type={'border'} prefix={'邮箱：'} name={'email'} onChange={val => {
         setError('');
         setEmail(val)
-      }} inputStyle={{ flex: 1 }} />
-      <LandInput type={'border'} inputType={'password'} width={'100%'} prefix={'密码：'} name={'password'} onChange={val => {
+      }}  />
+      <LandInput type={'border'} inputType={'password'} prefix={'密码：'} name={'password'} onChange={val => {
         setError('');
         setPassword(val)
-      }} inputStyle={{ flex: 1 }} />
+      }}  />
       {error && <LandAlert type={'fail'} title={error} />}
     </div>}
   </LandDialog>)

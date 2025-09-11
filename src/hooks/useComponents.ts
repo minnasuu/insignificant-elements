@@ -69,6 +69,7 @@ export function useComponentsByCategory(category: string) {
 
 export function useUserComponents() {
   const { user } = useAuth();
+  
   const [components, setComponents] = useState<ComponentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

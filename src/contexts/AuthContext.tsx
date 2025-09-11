@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Mock user type
 interface User {
@@ -49,7 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 模拟登录验证
     if (email && password) {
       const mockUser: User = {
-        id: 'mock-user-id',
+        id: uuidv4(),
         email: email,
         user_metadata: {
           username: email.split('@')[0],
@@ -66,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 模拟注册
     if (email && password) {
       const mockUser: User = {
-        id: 'mock-user-id',
+        id: uuidv4(),
         email: email,
         user_metadata: {
           username: userData?.username || email.split('@')[0],

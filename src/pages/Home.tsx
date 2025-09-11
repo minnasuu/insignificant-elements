@@ -1,8 +1,11 @@
 import Header from '../components/Header';
 import CategoryNav from '../components/CategoryNav';
 import ComponentGrid from '../components/ComponentGrid';
+import CreateDrawer from '../components/CreateDrawer';
 import { useComponentFilter } from '../hooks/useComponentFilter';
 import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
+import { message } from '@suminhan/land-design';
 
 export default function Home() {
   const { user } = useAuth();
@@ -14,6 +17,18 @@ export default function Home() {
     loading,
     error
   } = useComponentFilter();
+  
+  const [showCreateDrawer, setShowCreateDrawer] = useState(false);
+
+  // 处理上传点击
+  const handleUploadClick = () => {
+    if (!user) {
+      message.error('请先登录');
+      return;
+    }
+    setShowCreateDrawer(true);
+  };
+
 
   // 加载状态
   if (loading) {
@@ -87,9 +102,17 @@ export default function Home() {
       <ComponentGrid
         components={filteredComponents}
         selectedCategory={selectedCategory}
-        onUpload={() => {
-          // TODO: 实现上传功能
-          console.log('上传功能待实现');
+        onUpload={handleUploadClick}
+      />
+
+      <CreateDrawer
+        show={showCreateDrawer}
+        onClose={() => setShowCreateDrawer(false)}
+        initialCategory={selectedCategory === 'all' ? 'style' : selectedCategory}
+        onSuccess={() => {
+          setShowCreateDrawer(false);
+          // 刷新组件列表
+          window.location.reload();
         }}
       />
     </div>
