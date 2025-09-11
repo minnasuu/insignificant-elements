@@ -18,36 +18,7 @@ export async function getComponents(): Promise<ComponentItem[]> {
       return [];
     }
 
-    // Get user data for each component
-    const userIds = [...new Set(data.map(component => component.user_id))];
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('id, username, avatar_url')
-      .in('uid', userIds);
-
-    if (usersError) {
-      console.error('Error fetching users:', usersError);
-      // Return components without user data if users fetch fails
-      return data.map(component => ({
-        ...component,
-        user: {
-          id: component.userId,
-          username: 'Unknown User',
-          avatar_url: undefined
-        }
-      }));
-    }
-
-    // Combine component and user data
-    const userMap = new Map(users?.map(user => [user.id, user]) || []);
-    return data.map(component => ({
-      ...component,
-      user: userMap.get(component.user_id) || {
-        id: component.userId,
-        username: 'Unknown User',
-        avatar_url: undefined
-      }
-    }));
+    return data;
   } catch (error) {
     console.error('Error in getComponents:', error);
     throw error;
@@ -72,36 +43,7 @@ export async function getComponentsByCategory(category: string): Promise<Compone
       return [];
     }
 
-    // Get user data for each component
-    const userIds = [...new Set(data.map(component => component.user_id))];
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('id, username, avatar_url')
-      .in('uid', userIds);
-
-    if (usersError) {
-      console.error('Error fetching users:', usersError);
-      // Return components without user data if users fetch fails
-      return data.map(component => ({
-        ...component,
-        user: {
-          id: component.user_id,
-          username: 'Unknown User',
-          avatar_url: undefined
-        }
-      }));
-    }
-
-    // Combine component and user data
-    const userMap = new Map(users?.map(user => [user.id, user]) || []);
-    return data.map(component => ({
-      ...component,
-      user: userMap.get(component.user_id) || {
-        id: component.user_id,
-        username: 'Unknown User',
-        avatar_url: undefined
-      }
-    }));
+    return data;
   } catch (error) {
     console.error('Error in getComponentsByCategory:', error);
     throw error;
@@ -126,35 +68,7 @@ export async function getUserComponents(userId: string): Promise<ComponentItem[]
       return [];
     }
 
-    // Get user data for the specific user
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, username, avatar_url')
-      .eq('uid', userId)
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user:', userError);
-      // Return components without user data if user fetch fails
-      return data.map(component => ({
-        ...component,
-        user: {
-          id: component.user_id,
-          username: 'Unknown User',
-          avatar_url: undefined
-        }
-      }));
-    }
-
-    // Combine component and user data
-    return data.map(component => ({
-      ...component,
-      user: user || {
-        id: component.user_id,
-        username: 'Unknown User',
-        avatar_url: undefined
-      }
-    }));
+    return data;
   } catch (error) {
     console.error('Error in getUserComponents:', error);
     throw error;
@@ -165,10 +79,12 @@ export async function getUserComponents(userId: string): Promise<ComponentItem[]
 export interface CreateComponentData {
   title: string;
   category: string;
+  desc?: string;
   html?: string;
   css?: string;
   js?: string;
-  tags: string[];
+  tags?: string[];
+  origin_link?: string;
   user_id: string;
 }
 export async function createComponent(componentData: CreateComponentData): Promise<ComponentItem> {
@@ -180,10 +96,12 @@ export async function createComponent(componentData: CreateComponentData): Promi
       .insert([{
         title: componentData.title,
         category: componentData.category,
+        desc: componentData.desc || '',
         html: componentData.html || '',
         css: componentData.css || '',
         js: componentData.js || '',
-        tags: componentData.tags,
+        tags: componentData.tags || [],
+        origin_link: componentData.origin_link || '',
         user_id: componentData.user_id,
         updated_at: new Date().toISOString().split('T')[0]
       }])
@@ -195,34 +113,7 @@ export async function createComponent(componentData: CreateComponentData): Promi
       throw error;
     }
 
-    // Get user data for the created component
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, username, avatar_url')
-      .eq('uid', componentData.user_id)
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user:', userError);
-      // Return component without user data if user fetch fails
-      return {
-        ...data,
-        user: {
-          id: componentData.user_id,
-          username: 'Unknown User',
-          avatar_url: undefined
-        }
-      };
-    }
-
-    return {
-      ...data,
-      user: user || {
-        id: componentData.user_id,
-        username: 'Unknown User',
-        avatar_url: undefined
-      }
-    };
+    return data;
   } catch (error) {
     console.error('Error in createComponent:', error);
     throw error;

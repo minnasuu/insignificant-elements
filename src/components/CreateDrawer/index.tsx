@@ -29,10 +29,12 @@ const CreateDrawer: React.FC<Props> = ({
   const [formData, setFormData] = useState({
     title: '',
     category: initialCategory,
+    desc: '',
     html: '',
     css: '',
     js: '',
-    tags: ''
+    tags: '',
+    origin_link: ''
   })
 
   const categories: CategoryOption[] = [
@@ -109,10 +111,12 @@ const CreateDrawer: React.FC<Props> = ({
       const componentData: CreateComponentData = {
         title: formData.title.trim(),
         category: formData.category,
+        desc: formData.desc.trim() || undefined,
         html: formData.html.trim(),
         css: formData.css.trim(),
         js: formData.js.trim(),
         tags,
+        origin_link: formData.origin_link.trim() || undefined,
         user_id: currentUserId
       }
 
@@ -124,10 +128,12 @@ const CreateDrawer: React.FC<Props> = ({
       setFormData({
         title: '',
         category: initialCategory,
+        desc: '',
         html: '',
         css: '',
         js: '',
-        tags: ''
+        tags: '',
+        origin_link: ''
       })
 
       // 调用成功回调
@@ -157,10 +163,12 @@ const CreateDrawer: React.FC<Props> = ({
         setFormData({
           title: '',
           category: initialCategory,
+          desc: '',
           html: '',
           css: '',
           js: '',
-          tags: ''
+          tags: '',
+          origin_link: ''
         })
       }}
       {...restProps}
@@ -182,6 +190,26 @@ const CreateDrawer: React.FC<Props> = ({
             checked={formData.category}
             onChange={(value) => handleInputChange('category', value)}
             data={categories}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">描述</label>
+          <LandInput
+            type="border"
+            value={formData.desc}
+            onChange={(value) => handleInputChange('desc', value)}
+            placeholder="请输入组件描述（可选）"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">原始链接</label>
+          <LandInput
+            type="border"
+            value={formData.origin_link}
+            onChange={(value) => handleInputChange('origin_link', value)}
+            placeholder="请输入原始链接（可选）"
           />
         </div>
 

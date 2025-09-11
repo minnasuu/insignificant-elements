@@ -1,5 +1,7 @@
 import ComponentRenderer from './ComponentRenderer';
 import type { ComponentItem } from '../types';
+import { useEffect, useState } from 'react';
+import { getUserInfo } from '../services/userService';
 
 interface ComponentCardProps {
   component: ComponentItem;
@@ -17,16 +19,38 @@ function getCategoryStyle(category: string) {
 
 export default function ComponentCard({ component }: ComponentCardProps) {
   const categoryStyle = getCategoryStyle(component.category);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
 
+  const fetchUserInfo = async (userId: string) => {
+    try {
+      const user = await getUserInfo(userId);
+      
+      if (user) {
+        setUsername(user.username || 'Unknown User');
+        setAvatarUrl(user.avatar_url || '');
+      } else {
+        setUsername('Unknown User');
+        setAvatarUrl('');
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      setUsername('Unknown User');
+      setAvatarUrl('');
+    }
+  };
+  useEffect(() => {
+    fetchUserInfo(component.user_id);
+  }, [component.user_id]);
   return (
     <div className="flex flex-col gap-4 h-full border border-gray-100 rounded-[16px] p-4 transition-shadow transition-transform duration-300 cursor-pointer">
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <h3 className="text-sm">{component.title}</h3>
-            {component.originLink && (
+            {component.origin_link && (
               <a
-                href={component.originLink}
+                href={component.origin_link}
                 target="_blank"
                 className="text-gray-400 text-sm hover:text-gray-800 transition-colors duration-300"
               >
@@ -56,44 +80,64 @@ export default function ComponentCard({ component }: ComponentCardProps) {
           </div>
         </div>
 
+        {component.desc && (
+          <div className="mt-2">
+            <p className="text-xs text-gray-600 line-clamp-2">{component.desc}</p>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mt-auto">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              {component.user.avatar_url ? (
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-gray-100">
+              {avatarUrl ? (
                 <img
-                  src={component.user.avatar_url}
-                  alt={component.user.username}
+                  src={avatarUrl}
+                  alt={username || 'User'}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to initials if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<span class="text-xs text-gray-500 font-medium">${(username?.charAt(0).toUpperCase() || 'U')}</span>`;
+                    }
+                  }}
                 />
               ) : (
-                <span className="text-xs text-gray-500">
-                  {component.user.username?.charAt(0).toUpperCase() || 'U'}
+                <span className="text-xs text-gray-500 font-medium">
+                  {username?.charAt(0).toUpperCase() || 'U'}
                 </span>
               )}
             </div>
-            <span className="text-gray-600 text-xs">{component.user.username}</span>
+            <span 
+              className="text-gray-600 text-xs truncate hover:text-gray-900 transition-colors"
+              title={username || 'Unknown User'}
+            >
+              {username || 'Unknown User'}
+            </span>
           </div>
-          <span className="text-gray-500 text-xs">{component.date}</span>
+          <span className="text-gray-500 text-xs flex-shrink-0 ml-2">
+            {new Date(component.created_at).toLocaleDateString()}
+          </span>
         </div>
 
-        <div className="flex gap-2 mt-2">
-          {component.tags.map((tag: string) => (
-            <span
-              key={tag}
-              className="text-gray-500 text-xs border border-gray-100 rounded-md px-2 py-1"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {component.tags && component.tags.length > 0 && (
+          <div className="flex gap-2 mt-2">
+            {component.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="text-gray-500 text-xs border border-gray-100 rounded-md px-2 py-1"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="relative h-48 bg-white rounded-[12px] border border-gray-200 overflow-hidden">
-        {component.component ? (
-          <div className="flex items-center justify-center w-full h-full">
-            {component.component}
-          </div>
-        ) : (component.html || component.css || component.js) ? (
+        {(component.html || component.css || component.js) ? (
           <ComponentRenderer
             html={component.html}
             css={component.css}
