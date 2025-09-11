@@ -82,7 +82,22 @@ export default function ComponentCard({ component }: ComponentCardProps) {
 
         {component.desc && (
           <div className="mt-2">
-            <p className="text-xs text-gray-600 line-clamp-2">{component.desc}</p>
+            <p className="text-xs text-gray-600 line-clamp-2">
+              {component.desc}
+            </p>
+          </div>
+        )}
+
+        {component.tags && component.tags.length > 0 && (
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {component.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="text-gray-500 text-xs border border-gray-100 rounded-md px-2 py-1 no-wrap"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         )}
 
@@ -92,52 +107,41 @@ export default function ComponentCard({ component }: ComponentCardProps) {
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
-                  alt={username || 'User'}
+                  alt={username || "User"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback to initials if image fails to load
                     const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
+                    target.style.display = "none";
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = `<span class="text-xs text-gray-500 font-medium">${(username?.charAt(0).toUpperCase() || 'U')}</span>`;
+                      parent.innerHTML = `<span class="text-xs text-gray-500 font-medium">${
+                        username?.charAt(0).toUpperCase() || "U"
+                      }</span>`;
                     }
                   }}
                 />
               ) : (
                 <span className="text-xs text-gray-500 font-medium">
-                  {username?.charAt(0).toUpperCase() || 'U'}
+                  {username?.charAt(0).toUpperCase() || "U"}
                 </span>
               )}
             </div>
-            <span 
+            <span
               className="text-gray-600 text-xs truncate hover:text-gray-900 transition-colors"
-              title={username || 'Unknown User'}
+              title={username || "Unknown User"}
             >
-              {username || 'Unknown User'}
+              {username || "Unknown User"}
             </span>
           </div>
           <span className="text-gray-500 text-xs flex-shrink-0 ml-2">
             {new Date(component.created_at).toLocaleDateString()}
           </span>
         </div>
-
-        {component.tags && component.tags.length > 0 && (
-          <div className="flex gap-2 mt-2">
-            {component.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className="text-gray-500 text-xs border border-gray-100 rounded-md px-2 py-1"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="relative h-48 bg-white rounded-[12px] border border-gray-200 overflow-hidden">
-        {(component.html || component.css || component.js) ? (
+        {component.html || component.css || component.js ? (
           <ComponentRenderer
             html={component.html}
             css={component.css}

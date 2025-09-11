@@ -23,7 +23,10 @@ export default function ComponentGrid({ components, selectedCategory, onUpload }
 
   return (
     <main className="px-4 py-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div
+        className="grid gap-4"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}
+      >
         {components.map((component) => (
           <ComponentCard key={component.id} component={component} />
         ))}
