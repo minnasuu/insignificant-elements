@@ -1,0 +1,78 @@
+import { LandButton } from "@suminhan/land-design";
+
+interface EmptyStateProps {
+  category: string;
+  onUpload: () => void;
+}
+
+const categoryMessages: Record<string, { title: string; description: string }> = {
+  all: {
+    title: "暂无组件",
+    description: "还没有任何组件，快来上传第一个吧！"
+  },
+  my: {
+    title: "我的组件",
+    description: "你还没有上传任何组件，开始创作你的第一个作品吧！"
+  },
+  style: {
+    title: "样式分类",
+    description: "这个分类下还没有样式组件，快来分享你的设计灵感！"
+  },
+  animation: {
+    title: "动画分类",
+    description: "动画效果分类还是空的，上传一些酷炫的动画组件吧！"
+  },
+  interaction: {
+    title: "交互分类",
+    description: "交互组件分类等待你的创意，快来添加一些有趣的交互效果！"
+  },
+  copywriting: {
+    title: "文案分类",
+    description: "文案创意分类需要你的灵感，分享一些优秀的文案设计吧！"
+  },
+  other: {
+    title: "其他分类",
+    description: "其他分类还没有内容，上传一些独特的组件来丰富这个分类！"
+  }
+};
+
+export default function EmptyState({ category, onUpload }: EmptyStateProps) {
+  const message = categoryMessages[category] || categoryMessages.all;
+
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="text-center max-w-md flex flex-col items-center justify-center">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+          <svg
+            className="w-8 h-8 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+        </div>
+
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          {message.title}
+        </h3>
+
+        <p className="text-gray-500 mb-6">
+          {message.description}
+        </p>
+
+        <LandButton.ButtonArrow
+          onClick={() => onUpload()}
+          text="立即上传"
+          type="background"
+        >
+        </LandButton.ButtonArrow>
+      </div>
+    </div>
+  );
+}

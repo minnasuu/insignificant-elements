@@ -1,14 +1,26 @@
-  import type { ComponentItem } from "./App";
+import type React from "react";
 import MoreCloseIcon from "./pages/Animation/MoreCloseIcon/index";
 import TextBottomFilter from "./pages/Visual/TextBottomFilter";
+
+type ComponentItem = {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  tags: string[];
+  component: React.ReactNode;
+  originLink?: string;
+  userId?: string;
+}
 
 export const components: ComponentItem[] = [
   {
     id: "gradient-divider",
     title: "渐变分割线",
-    category: "样式",
+    category: "style",
     date: "2025-09-04",
     tags: ["linear-gradient"],
+    userId: "demo-user-1", // 模拟用户上传
     component: (
       <div
         className="w-full h-px to-gray-100"
@@ -24,7 +36,7 @@ export const components: ComponentItem[] = [
   {
     id: "gradient-wave-divider",
     title: "渐变波浪分割线",
-    category: "样式",
+    category: "style",
     date: "2025-09-04",
     tags: ["linear-gradient"],
     component: (
@@ -35,11 +47,11 @@ export const components: ComponentItem[] = [
           width: "180px",
           backgroundImage: "url(./line.svg)",
           filter: "invert(1)",
-          "-webkit-mask-image":
+          WebkitMaskImage:
             "linear-gradient(90deg, transparent, #fff 4rem, #fff calc(100% - 4rem), transparent)",
-          "mask-image":
+          maskImage:
             "linear-gradient(90deg, transparent, #fff 4rem, #fff calc(100% - 4rem), transparent)",
-        }}
+        } as React.CSSProperties}
       ></div>
     ),
     originLink: "https://cmdk.paco.me/",
@@ -47,7 +59,7 @@ export const components: ComponentItem[] = [
   {
     id: "text-bottom-filter",
     title: "Text Bottom Filter",
-    category: "样式",
+    category: "style",
     date: "2025-09-04",
     tags: ["back-drop-filter"],
     component: <TextBottomFilter />,
@@ -56,7 +68,7 @@ export const components: ComponentItem[] = [
   {
     id: "blur-text",
     title: "Blur Text",
-    category: "样式",
+    category: "style",
     date: "2025-09-04",
     tags: ["blur"],
     component: (
@@ -86,27 +98,29 @@ export const components: ComponentItem[] = [
   {
     id: "more&close-btn",
     title: "More & Close Button",
-    category: "动画",
+    category: "animation",
     date: "2025-09-07",
     tags: ["button", "transform"],
+    userId: "demo-user-2", // 模拟用户上传
     component: <MoreCloseIcon />,
     originLink: "https://layrid.tomoyaokada.com/"
   },
   {
     id: "slash-background",
     title: "Slash Background",
-    category: "样式",
+    category: "style",
     date: "2025-09-08",
     tags: ["background"],
-    component: <div className="w-full h-full bg-[size:8px_8px] bg-top-left text-black/10 bg-[image:repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)]"  />,
+    component: <div className="w-full h-full bg-[size:8px_8px] bg-top-left text-black/10 bg-[image:repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)]" />,
     originLink: "https://tailwindcss.com/"
   },
   {
     id: 'dot-background',
     title: 'Dots Background',
-    category: '样式',
+    category: 'style',
     date: '2025-09-08',
     tags: ['background'],
+    userId: 'demo-user-1', // 模拟用户上传
     component: <div className="w-full h-full p-4 sm:p-8 relative overflow-hidden rounded-lg bg-[image:radial-gradient(var(--pattern-fg)_1px,_transparent_0)] bg-[size:10px_10px] bg-fixed [--pattern-fg:var(--color-gray-950)]/5 dark:[--pattern-fg:var(--color-white)]/10"></div>,
     originLink: "https://tailwindcss.com/"
   }
