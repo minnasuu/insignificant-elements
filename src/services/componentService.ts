@@ -157,3 +157,46 @@ export async function createComponent(componentData: CreateComponentData): Promi
     throw error;
   }
 }
+
+// 更新组件
+export interface UpdateComponentData {
+  title: string;
+  category: string;
+  desc?: string;
+  html?: string;
+  css?: string;
+  js?: string;
+  tags?: string[];
+  origin_link?: string;
+}
+
+export async function updateComponent(id: string, componentData: UpdateComponentData): Promise<ComponentItem> {
+  try {
+    const { data, error } = await supabase
+      .from('littleTasteData')
+      .update({
+        title: componentData.title,
+        category: componentData.category,
+        desc: componentData.desc || '',
+        html: componentData.html || '',
+        css: componentData.css || '',
+        js: componentData.js || '',
+        tags: componentData.tags || [],
+        origin_link: componentData.origin_link || '',
+        updated_at: new Date().toISOString().split('T')[0]
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating component:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in updateComponent:', error);
+    throw error;
+  }
+}

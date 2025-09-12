@@ -30,6 +30,9 @@ export default function ComponentRenderer({ html, css, js }: ComponentRendererPr
       htmlElement.innerHTML = html;
       htmlElement.style.width = '100%';
       htmlElement.style.height = '100%';
+      htmlElement.style.display = 'flex';
+      htmlElement.style.alignItems = 'center';
+      htmlElement.style.justifyContent = 'center';
       container.appendChild(htmlElement);
     }
 

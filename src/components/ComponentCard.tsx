@@ -2,25 +2,34 @@ import ComponentRenderer from './ComponentRenderer';
 import type { ComponentItem } from '../types';
 import { useEffect, useState } from 'react';
 import { getUserInfo } from '../services/userService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ComponentCardProps {
   component: ComponentItem;
+  onEdit?: (component: ComponentItem) => void;
 }
 
 function getCategoryStyle(category: string) {
   const styles = {
-    '样式': { background: '#f0f9ff', color: '#3b82f6' },
-    '动画': { background: '#fffbeb', color: '#f59e0b' },
+    'style': { background: '#f0f9ff', color: '#3b82f6' },
+    'animation': { background: '#fffbeb', color: '#f59e0b' },
+    'interaction': { background: '#f0fdf4', color: '#16a34a' },
+    'copywriting': { background: '#fdf2f8', color: '#ec4899' },
+    'other': { background: '#f0fdf4', color: '#16a34a' },
     default: { background: '#f0fdf4', color: '#16a34a' }
   };
 
   return styles[category as keyof typeof styles] || styles.default;
 }
 
-export default function ComponentCard({ component }: ComponentCardProps) {
+export default function ComponentCard({ component, onEdit }: ComponentCardProps) {
+  const { user } = useAuth();
   const categoryStyle = getCategoryStyle(component.category);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [username, setUsername] = useState<string>('');
+
+  // 检查当前用户是否是组件的创建者
+  const isOwner = user && user.id === component.user_id;
 
   const fetchUserInfo = async (userId: string) => {
     try {
@@ -72,11 +81,46 @@ export default function ComponentCard({ component }: ComponentCardProps) {
               </a>
             )}
           </div>
-          <div
-            className="text-gray-500 text-xs px-2 py-1 rounded-md"
-            style={categoryStyle}
-          >
-            {component.category}
+          <div className="flex items-center gap-2">
+            {isOwner && onEdit && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(component);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors duration-300 p-1"
+                title="编辑组件"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
+            <div
+              className="text-gray-500 text-xs px-2 py-1 rounded-md"
+              style={categoryStyle}
+            >
+              {component.category}
+            </div>
           </div>
         </div>
 

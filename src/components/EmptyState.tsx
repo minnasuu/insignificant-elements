@@ -1,8 +1,5 @@
-import { LandButton } from "@suminhan/land-design";
-
 interface EmptyStateProps {
   category: string;
-  onUpload: () => void;
 }
 
 const categoryMessages: Record<string, { title: string; description: string }> = {
@@ -36,7 +33,7 @@ const categoryMessages: Record<string, { title: string; description: string }> =
   }
 };
 
-export default function EmptyState({ category, onUpload }: EmptyStateProps) {
+export default function EmptyState({ category }: EmptyStateProps) {
   const message = categoryMessages[category] || categoryMessages.all;
 
   return (
@@ -53,7 +50,7 @@ export default function EmptyState({ category, onUpload }: EmptyStateProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={1.5}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
         </div>
@@ -62,16 +59,9 @@ export default function EmptyState({ category, onUpload }: EmptyStateProps) {
           {message.title}
         </h3>
 
-        <p className="text-gray-500 mb-6">
+        <p className="text-gray-500">
           {message.description}
         </p>
-
-        <LandButton.ButtonArrow
-          onClick={() => onUpload()}
-          text="立即上传"
-          type="background"
-        >
-        </LandButton.ButtonArrow>
       </div>
     </div>
   );

@@ -2,11 +2,13 @@ import {
   LandDrawer, 
   type DrawerProps,
   LandRadioGroup,
-  LandInput
+  LandInput,
+  Icon
 } from '@suminhan/land-design'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { createComponent, type CreateComponentData } from '../../services/componentService'
+import { createComponent, updateComponent, type CreateComponentData, type UpdateComponentData } from '../../services/componentService'
+import type { ComponentItem } from '../../types'
 import CodeEditor from '../CodeEditor'
 import ComponentRenderer from '../ComponentRenderer'
 
@@ -18,11 +20,13 @@ interface CategoryOption {
 type Props = {
   initialCategory?: string;
   onSuccess?: () => void;
+  editingComponent?: ComponentItem | null;
 } & DrawerProps
 
 const CreateDrawer: React.FC<Props> = ({
   initialCategory = 'style',
   onSuccess,
+  editingComponent,
   ...restProps
 }) => {
   const { user } = useAuth()
@@ -34,9 +38,14 @@ const CreateDrawer: React.FC<Props> = ({
     html: '',
     css: '',
     js: '',
-    tags: '',
+    tags: [] as string[],
     origin_link: ''
   })
+
+  const isEditMode = !!editingComponent
+  
+  // 本地缓存key
+  const CACHE_KEY = 'create_drawer_form_data'
 
   const categories: CategoryOption[] = [
     { key: 'style', label: '样式' },
@@ -49,10 +58,11 @@ const CreateDrawer: React.FC<Props> = ({
   // 获取分类样式
   const getCategoryStyle = (category: string) => {
     const styles = {
-      '样式': { background: '#f0f9ff', color: '#3b82f6' },
-      '动画': { background: '#fffbeb', color: '#f59e0b' },
-      '交互': { background: '#f0fdf4', color: '#16a34a' },
-      '文案': { background: '#fdf2f8', color: '#ec4899' },
+      'style': { background: '#f0f9ff', color: '#3b82f6' },
+      'animation': { background: '#fffbeb', color: '#f59e0b' },
+      'interaction': { background: '#f0fdf4', color: '#16a34a' },
+      'copywriting': { background: '#fdf2f8', color: '#ec4899' },
+      'other': { background: '#f0fdf4', color: '#16a34a' },
       default: { background: '#f0fdf4', color: '#16a34a' }
     };
     return styles[category as keyof typeof styles] || styles.default;
@@ -64,13 +74,87 @@ const CreateDrawer: React.FC<Props> = ({
     return category ? category.label : key;
   }
 
-  // 当初始类别变化时更新表单
+  // 保存表单数据到本地缓存
+  const saveToCache = useCallback(() => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(formData))
+      showMessage('已保存到本地缓存', 'success')
+    } catch (error) {
+      console.error('保存到缓存失败:', error)
+      showMessage('保存到缓存失败')
+    }
+  }, [formData])
+
+  // 从本地缓存加载表单数据
+  const loadFromCache = useCallback(() => {
+    try {
+      const cachedData = localStorage.getItem(CACHE_KEY)
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData)
+        return parsedData
+      }
+    } catch (error) {
+      console.error('从缓存加载失败:', error)
+    }
+    return null
+  }, [])
+
+  // 清空本地缓存
+  const clearCache = useCallback(() => {
+    try {
+      localStorage.removeItem(CACHE_KEY)
+    } catch (error) {
+      console.error('清空缓存失败:', error)
+    }
+  }, [])
+
+  // 处理键盘快捷键
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // 检测 Cmd+S (Mac) 或 Ctrl+S (Windows/Linux)
+    if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+      event.preventDefault() // 阻止浏览器默认保存行为
+      saveToCache()
+    }
+  }, [saveToCache])
+
+  // 当编辑组件或初始类别变化时更新表单
   useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      category: initialCategory
-    }))
-  }, [initialCategory])
+    if (editingComponent) {
+      // 编辑模式：填入组件数据
+      setFormData({
+        title: editingComponent.title,
+        category: editingComponent.category,
+        desc: editingComponent.desc || '',
+        html: editingComponent.html || '',
+        css: editingComponent.css || '',
+        js: editingComponent.js || '',
+        tags: editingComponent.tags || [],
+        origin_link: editingComponent.origin_link || ''
+      })
+    } else {
+      // 创建模式：尝试从缓存加载，否则使用默认值
+      const cachedData = loadFromCache()
+      if (cachedData) {
+        setFormData({
+          ...cachedData,
+          category: cachedData.category || initialCategory
+        })
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          category: initialCategory
+        }))
+      }
+    }
+  }, [editingComponent, initialCategory, loadFromCache])
+
+  // 添加键盘事件监听器
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleKeyDown])
 
 
   const handleInputChange = (field: string, value: string) => {
@@ -78,6 +162,62 @@ const CreateDrawer: React.FC<Props> = ({
       ...prev,
       [field]: value
     }))
+  }
+
+  const handleTagsChange = (tags: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: tags
+    }))
+  }
+
+  // 标签输入组件
+  const TagsInput: React.FC<{ value: string[], onChange: (tags: string[]) => void, placeholder?: string }> = ({ 
+    value, 
+    onChange, 
+    placeholder 
+  }) => {
+    const [inputValue, setInputValue] = useState('')
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && inputValue.trim()) {
+        e.preventDefault()
+        const newTag = inputValue.trim()
+        if (!value.includes(newTag)) {
+          onChange([...value, newTag])
+        }
+        setInputValue('')
+      } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
+        // 当输入框为空且按下退格键时，删除最后一个标签
+        onChange(value.slice(0, -1))
+      }
+    }
+
+    const removeTag = (indexToRemove: number) => {
+      onChange(value.filter((_, index) => index !== indexToRemove))
+    }
+
+    return (
+      <div className="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-lg min-h-[40px]">
+        {value.map((tag, index) => (
+          <span
+            key={index}
+            className="inline-flex items-center gap-1 px-2 bg-white text-gray-800 text-sm rounded-md"
+          >
+            {tag}
+            <Icon name="close" size={16} className='cursor-pointer color-gray-600 hover:color-gray-800' onClick={() => removeTag(index)}/>
+          </span>
+        ))}
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={value.length === 0 ? placeholder : ''}
+          className="flex-1 min-w-[120px] text-sm outline-none border-none bg-transparent"
+        />
+      </div>
+    )
   }
 
   // 获取当前登录用户的ID
@@ -103,13 +243,6 @@ const CreateDrawer: React.FC<Props> = ({
   }
 
   const handleSubmit = async () => {
-    // 获取当前登录用户ID
-    const currentUserId = getCurrentUserId()
-    if (!currentUserId) {
-      showMessage('用户未登录，请先登录')
-      return
-    }
-
     if (!formData.title.trim()) {
       showMessage('请输入标题')
       return
@@ -123,43 +256,68 @@ const CreateDrawer: React.FC<Props> = ({
     setLoading(true)
     try {
       const tags = formData.tags
-        .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0)
 
-      const componentData: CreateComponentData = {
-        title: formData.title.trim(),
-        category: formData.category,
-        desc: formData.desc.trim() || undefined,
-        html: formData.html.trim(),
-        css: formData.css.trim(),
-        js: formData.js.trim(),
-        tags,
-        origin_link: formData.origin_link.trim() || undefined,
-        user_id: currentUserId
-      }
+      if (isEditMode && editingComponent) {
+        // 编辑模式：更新组件
+        const updateData: UpdateComponentData = {
+          title: formData.title.trim(),
+          category: formData.category,
+          desc: formData.desc.trim() || undefined,
+          html: formData.html.trim(),
+          css: formData.css.trim(),
+          js: formData.js.trim(),
+          tags,
+          origin_link: formData.origin_link.trim() || undefined,
+        }
 
-      await createComponent(componentData)
+        await updateComponent(editingComponent.id, updateData)
+        showMessage('更新成功！', 'success')
+      } else {
+        // 创建模式：创建新组件
+        const currentUserId = getCurrentUserId()
+        if (!currentUserId) {
+          showMessage('用户未登录，请先登录')
+          return
+        }
+
+        const componentData: CreateComponentData = {
+          title: formData.title.trim(),
+          category: formData.category,
+          desc: formData.desc.trim() || undefined,
+          html: formData.html.trim(),
+          css: formData.css.trim(),
+          js: formData.js.trim(),
+          tags,
+          origin_link: formData.origin_link.trim() || undefined,
+          user_id: currentUserId
+        }
+
+        await createComponent(componentData)
+        showMessage('创建成功！', 'success')
+      }
       
-      showMessage('创建成功！', 'success')
-      
-      // 重置表单
-      setFormData({
-        title: '',
-        category: initialCategory,
-        desc: '',
-        html: '',
-        css: '',
-        js: '',
-        tags: '',
-        origin_link: ''
-      })
+      // 重置表单（仅在创建模式下）
+      if (!isEditMode) {
+        setFormData({
+          title: '',
+          category: initialCategory,
+          desc: '',
+          html: '',
+          css: '',
+          js: '',
+          tags: [],
+          origin_link: ''
+        })
+        clearCache() // 创建成功后清空缓存
+      }
 
       // 调用成功回调
       onSuccess?.()
     } catch (error) {
-      console.error('创建组件失败:', error)
-      showMessage('创建失败，请重试')
+      console.error(isEditMode ? '更新组件失败:' : '创建组件失败:', error)
+      showMessage(isEditMode ? '更新失败，请重试' : '创建失败，请重试')
     } finally {
       setLoading(false)
     }
@@ -172,33 +330,36 @@ const CreateDrawer: React.FC<Props> = ({
   return (
     <LandDrawer
       mask
-      title="创建新组件"
+      title={isEditMode ? "编辑组件" : "新建组件"}
       size="large"
       onSubmit={handleSubmit}
-      submitLabel= {loading ? '创建中...' : '确定创建'}
-      cancelLabel="重置"
+      submitLabel={loading ? (isEditMode ? '更新中...' : '创建中...') : (isEditMode ? '确定更新' : '确定创建')}
+      cancelLabel={isEditMode ? "取消" : "重置"}
       submitDisabled={submitDisabled}
       onCancel={() => {
-        setFormData({
-          title: '',
-          category: initialCategory,
-          desc: '',
-          html: '',
-          css: '',
-          js: '',
-          tags: '',
-          origin_link: ''
-        })
+        if (!isEditMode) {
+          setFormData({
+            title: '',
+            category: initialCategory,
+            desc: '',
+            html: '',
+            css: '',
+            js: '',
+            tags: [],
+            origin_link: ''
+          })
+          clearCache() // 清空本地缓存
+        }
       }}
       {...restProps}
     >
-      <div className="h-full flex gap-6 p-4">
+      <div className="h-full flex">
         {/* 左侧表单区域 */}
-        <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
+        <div className="flex-1 flex flex-col gap-4 overflow-y-auto p-4 border-r border-gray-200">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">标题 *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">标题 <span className="text-red-500">*</span></label>
           <LandInput
-            type="border"
+            type="background"
             value={formData.title}
             onChange={(value) => handleInputChange('title', value)}
             placeholder="请输入组件标题"
@@ -206,7 +367,7 @@ const CreateDrawer: React.FC<Props> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">类别 *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">类别 <span className="text-red-500">*</span></label>
           <LandRadioGroup
             checked={formData.category}
             onChange={(value) => handleInputChange('category', value)}
@@ -217,7 +378,7 @@ const CreateDrawer: React.FC<Props> = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">描述</label>
           <LandInput
-            type="border"
+            type="background"
             value={formData.desc}
             onChange={(value) => handleInputChange('desc', value)}
             placeholder="请输入组件描述（可选）"
@@ -227,7 +388,7 @@ const CreateDrawer: React.FC<Props> = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">原始链接</label>
           <LandInput
-            type="border"
+            type="background"
             value={formData.origin_link}
             onChange={(value) => handleInputChange('origin_link', value)}
             placeholder="请输入原始链接（可选）"
@@ -269,17 +430,22 @@ const CreateDrawer: React.FC<Props> = ({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
-          <LandInput
-            type="border"
+          {/* <LandInput
+            type="background"
             value={formData.tags}
             onChange={(value) => handleInputChange('tags', value)}
             placeholder="请输入标签，用逗号分隔"
+          /> */}
+          <TagsInput
+            value={formData.tags}
+            onChange={handleTagsChange}
+            placeholder="请输入标签，按回车添加"
           />
         </div>
         </div>
 
         {/* 右侧预览区域 */}
-        <div className="w-80 flex-shrink-0">
+        <div className="max-w-80 min-w-60 p-4 flex-shrink-0">
           <div className="sticky top-0">
             <h3 className="text-sm font-medium text-gray-700 mb-4">预览效果</h3>
             <div className="flex flex-col gap-4 h-full border border-gray-100 rounded-[16px] p-4 bg-white">
@@ -323,9 +489,9 @@ const CreateDrawer: React.FC<Props> = ({
                   </div>
                 )}
 
-                {formData.tags && (
+                {formData.tags && formData.tags.length > 0 && (
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {formData.tags.split(',').map((tag, index) => {
+                    {formData.tags.map((tag, index) => {
                       const trimmedTag = tag.trim();
                       return trimmedTag ? (
                         <span
@@ -365,9 +531,9 @@ const CreateDrawer: React.FC<Props> = ({
                   />
                 ) : (
                   <div className="flex gap-2 items-center justify-center h-full">
-                    <div className="preview-element w-2 h-2 bg-gray-600 rounded-full"></div>
-                    <div className="preview-element w-2 h-2 bg-gray-600 rounded-full"></div>
-                    <div className="preview-element w-2 h-2 bg-gray-600 rounded-full"></div>
+                    <div className="preview-element w-2 h-2 bg-gray-300 rounded-full"></div>
+                    <div className="preview-element w-2 h-2 bg-gray-300 rounded-full"></div>
+                    <div className="preview-element w-2 h-2 bg-gray-300 rounded-full"></div>
                   </div>
                 )}
               </div>

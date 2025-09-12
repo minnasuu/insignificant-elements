@@ -4,8 +4,9 @@ import ComponentGrid from '../components/ComponentGrid';
 import CreateDrawer from '../components/CreateDrawer';
 import { useComponentFilter } from '../hooks/useComponentFilter';
 import { useAuth } from '../contexts/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { message } from '@suminhan/land-design';
+import type { ComponentItem } from '../types';
 
 export default function Home() {
   const { user } = useAuth();
@@ -19,6 +20,33 @@ export default function Home() {
   } = useComponentFilter();
   
   const [showCreateDrawer, setShowCreateDrawer] = useState(false);
+  const [editingComponent, setEditingComponent] = useState<ComponentItem | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const welcomeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 监听用户登录状态变化，显示欢迎消息
+  useEffect(() => {
+    if (user && !showWelcome) {
+      setShowWelcome(true);
+      
+      // 清除之前的定时器
+      if (welcomeTimerRef.current) {
+        clearTimeout(welcomeTimerRef.current);
+      }
+      
+      // 5秒后隐藏欢迎消息
+      welcomeTimerRef.current = setTimeout(() => {
+        setShowWelcome(false);
+      }, 5000);
+    }
+
+    // 清理函数
+    return () => {
+      if (welcomeTimerRef.current) {
+        clearTimeout(welcomeTimerRef.current);
+      }
+    };
+  }, [user, showWelcome]);
 
   // 处理上传点击
   const handleUploadClick = () => {
@@ -26,6 +54,13 @@ export default function Home() {
       message.error('请先登录');
       return;
     }
+    setEditingComponent(null); // 清除编辑状态
+    setShowCreateDrawer(true);
+  };
+
+  // 处理编辑点击
+  const handleEditClick = (component: ComponentItem) => {
+    setEditingComponent(component);
     setShowCreateDrawer(true);
   };
 
@@ -85,11 +120,28 @@ export default function Home() {
         description="A collection of refined UI components and interactions"
       />
 
-      {user && (
-        <div className="px-4 py-2 bg-blue-50">
-          <p className="text-sm text-blue-600">
-            欢迎回来，{user.user_metadata?.username}！
-          </p>
+      {user && showWelcome && (
+        <div className="px-4 py-2 bg-blue-50 transition-all duration-300 ease-in-out">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-blue-600">
+              欢迎回来，{user.user_metadata?.username}！
+            </p>
+            <button
+              onClick={() => setShowWelcome(false)}
+              className="text-blue-400 hover:text-blue-600 transition-colors duration-200 ml-2"
+              title="关闭"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
@@ -97,20 +149,26 @@ export default function Home() {
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
+        onUpload={handleUploadClick}
       />
 
       <ComponentGrid
         components={filteredComponents}
         selectedCategory={selectedCategory}
-        onUpload={handleUploadClick}
+        onEdit={handleEditClick}
       />
 
       <CreateDrawer
         show={showCreateDrawer}
-        onClose={() => setShowCreateDrawer(false)}
+        onClose={() => {
+          setShowCreateDrawer(false);
+          setEditingComponent(null); // 清除编辑状态
+        }}
         initialCategory={selectedCategory === 'all' ? 'style' : selectedCategory}
+        editingComponent={editingComponent}
         onSuccess={() => {
           setShowCreateDrawer(false);
+          setEditingComponent(null); // 清除编辑状态
           // 刷新组件列表
           window.location.reload();
         }}
