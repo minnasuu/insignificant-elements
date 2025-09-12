@@ -8,6 +8,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { createComponent, type CreateComponentData } from '../../services/componentService'
 import CodeEditor from '../CodeEditor'
+import ComponentRenderer from '../ComponentRenderer'
 
 interface CategoryOption {
   key: string;
@@ -44,6 +45,24 @@ const CreateDrawer: React.FC<Props> = ({
     { key: 'copywriting', label: '文案' },
     { key: 'other', label: '其他' }
   ]
+
+  // 获取分类样式
+  const getCategoryStyle = (category: string) => {
+    const styles = {
+      '样式': { background: '#f0f9ff', color: '#3b82f6' },
+      '动画': { background: '#fffbeb', color: '#f59e0b' },
+      '交互': { background: '#f0fdf4', color: '#16a34a' },
+      '文案': { background: '#fdf2f8', color: '#ec4899' },
+      default: { background: '#f0fdf4', color: '#16a34a' }
+    };
+    return styles[category as keyof typeof styles] || styles.default;
+  }
+
+  // 获取分类中文显示
+  const getCategoryLabel = (key: string) => {
+    const category = categories.find(c => c.key === key);
+    return category ? category.label : key;
+  }
 
   // 当初始类别变化时更新表单
   useEffect(() => {
@@ -173,7 +192,9 @@ const CreateDrawer: React.FC<Props> = ({
       }}
       {...restProps}
     >
-      <div className="h-full flex flex-col gap-4 p-4 overflow-y-auto">
+      <div className="h-full flex gap-6 p-4">
+        {/* 左侧表单区域 */}
+        <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">标题 *</label>
           <LandInput
@@ -254,6 +275,104 @@ const CreateDrawer: React.FC<Props> = ({
             onChange={(value) => handleInputChange('tags', value)}
             placeholder="请输入标签，用逗号分隔"
           />
+        </div>
+        </div>
+
+        {/* 右侧预览区域 */}
+        <div className="w-80 flex-shrink-0">
+          <div className="sticky top-0">
+            <h3 className="text-sm font-medium text-gray-700 mb-4">预览效果</h3>
+            <div className="flex flex-col gap-4 h-full border border-gray-100 rounded-[16px] p-4 bg-white">
+              <div className="flex-1 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm">{formData.title || '组件标题'}</h3>
+                    {formData.origin_link && (
+                      <div className="text-gray-400 text-sm">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 48 48"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M24.7073 9.56521L9.85801 24.4145C6.34329 27.9292 6.34329 33.6277 9.85801 37.1424V37.1424C13.3727 40.6571 19.0712 40.6571 22.5859 37.1424L40.2636 19.4647C42.6067 17.1216 42.6067 13.3226 40.2636 10.9794V10.9794C37.9205 8.63628 34.1215 8.63628 31.7783 10.9794L14.1007 28.6571C12.9291 29.8287 12.9291 31.7282 14.1007 32.8997V32.8997C15.2722 34.0713 17.1717 34.0713 18.3433 32.8997L33.1925 18.0505"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="text-gray-500 text-xs px-2 py-1 rounded-md"
+                    style={getCategoryStyle(getCategoryLabel(formData.category))}
+                  >
+                    {getCategoryLabel(formData.category)}
+                  </div>
+                </div>
+
+                {formData.desc && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-600 line-clamp-2">
+                      {formData.desc}
+                    </p>
+                  </div>
+                )}
+
+                {formData.tags && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {formData.tags.split(',').map((tag, index) => {
+                      const trimmedTag = tag.trim();
+                      return trimmedTag ? (
+                        <span
+                          key={index}
+                          className="text-gray-500 text-xs border border-gray-100 rounded-md px-2 py-1 no-wrap"
+                        >
+                          {trimmedTag}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center mt-auto">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-gray-100">
+                      <span className="text-xs text-gray-500 font-medium">
+                        {user?.user_metadata?.username?.charAt(0).toUpperCase() || "U"}
+                      </span>
+                    </div>
+                    <span className="text-gray-600 text-xs truncate">
+                      {user?.user_metadata?.username || "当前用户"}
+                    </span>
+                  </div>
+                  <span className="text-gray-500 text-xs flex-shrink-0 ml-2">
+                    {new Date().toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative h-48 bg-white rounded-[12px] border border-gray-200 overflow-hidden">
+                {formData.html || formData.css || formData.js ? (
+                  <ComponentRenderer
+                    html={formData.html}
+                    css={formData.css}
+                    js={formData.js}
+                  />
+                ) : (
+                  <div className="flex gap-2 items-center justify-center h-full">
+                    <div className="preview-element w-2 h-2 bg-gray-600 rounded-full"></div>
+                    <div className="preview-element w-2 h-2 bg-gray-600 rounded-full"></div>
+                    <div className="preview-element w-2 h-2 bg-gray-600 rounded-full"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </LandDrawer>

@@ -28,6 +28,8 @@ export default function ComponentRenderer({ html, css, js }: ComponentRendererPr
     if (html) {
       const htmlElement = document.createElement('div');
       htmlElement.innerHTML = html;
+      htmlElement.style.width = '100%';
+      htmlElement.style.height = '100%';
       container.appendChild(htmlElement);
     }
 
