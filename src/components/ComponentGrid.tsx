@@ -5,18 +5,17 @@ import type { ComponentItem } from '../types';
 interface ComponentGridProps {
   components: ComponentItem[];
   selectedCategory: string;
-  onUpload?: () => void;
 }
 
-export default function ComponentGrid({ components, selectedCategory, onUpload }: ComponentGridProps) {
+export default function ComponentGrid({
+  components,
+  selectedCategory,
+}: ComponentGridProps) {
   // 如果没有组件，显示空状态
   if (components.length === 0) {
     return (
       <main className="px-4 py-6">
-        <EmptyState
-          category={selectedCategory}
-          onUpload={onUpload || (() => console.log('上传功能待实现'))}
-        />
+        <EmptyState category={selectedCategory} />
       </main>
     );
   }

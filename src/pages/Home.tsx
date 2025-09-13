@@ -97,18 +97,20 @@ export default function Home() {
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
+        onCreate={handleUploadClick}
       />
 
       <ComponentGrid
         components={filteredComponents}
         selectedCategory={selectedCategory}
-        onUpload={handleUploadClick}
       />
 
       <CreateDrawer
         show={showCreateDrawer}
         onClose={() => setShowCreateDrawer(false)}
-        initialCategory={selectedCategory === 'all' ? 'style' : selectedCategory}
+        initialCategory={
+          selectedCategory === "all" ? "style" : selectedCategory
+        }
         onSuccess={() => {
           setShowCreateDrawer(false);
           // 刷新组件列表

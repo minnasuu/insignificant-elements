@@ -2,7 +2,6 @@ import { LandButton } from "@suminhan/land-design";
 
 interface EmptyStateProps {
   category: string;
-  onUpload: () => void;
 }
 
 const categoryMessages: Record<string, { title: string; description: string }> = {
@@ -36,7 +35,7 @@ const categoryMessages: Record<string, { title: string; description: string }> =
   }
 };
 
-export default function EmptyState({ category, onUpload }: EmptyStateProps) {
+export default function EmptyState({ category }: EmptyStateProps) {
   const message = categoryMessages[category] || categoryMessages.all;
 
   return (
@@ -62,16 +61,7 @@ export default function EmptyState({ category, onUpload }: EmptyStateProps) {
           {message.title}
         </h3>
 
-        <p className="text-gray-500 mb-6">
-          {message.description}
-        </p>
-
-        <LandButton.ButtonArrow
-          onClick={() => onUpload()}
-          text="立即上传"
-          type="background"
-        >
-        </LandButton.ButtonArrow>
+        <p className="text-gray-500">{message.description}</p>
       </div>
     </div>
   );
