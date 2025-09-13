@@ -13,7 +13,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   value,
   onChange,
   language,
-  placeholder = '',
   height = '200px'
 }) => {
   const handleEditorChange = (value: string | undefined) => {
@@ -25,39 +24,40 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       case 'html':
         return {
           language: 'html',
-          theme: 'vs-light',
+          theme: 'one-light',
           options: {
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
-            wordWrap: 'on',
+            wordWrap: 'on' as const,
             automaticLayout: true,
             fontSize: 14,
-            lineNumbers: 'on',
+            lineNumbers: 'on' as const,
             folding: true,
             lineDecorationsWidth: 0,
             lineNumbersMinChars: 0,
-            renderLineHighlight: 'none',
+            renderLineHighlight: 'none' as const,
             selectOnLineNumbers: true,
             roundedSelection: false,
             readOnly: false,
-            cursorStyle: 'line',
+            cursorStyle: 'line' as const,
             tabSize: 2,
             insertSpaces: true,
             detectIndentation: false,
             trimAutoWhitespace: true,
-            wordBasedSuggestions: 'off',
+            wordBasedSuggestions: 'off' as const,
             suggestOnTriggerCharacters: true,
-            acceptSuggestionOnEnter: 'on',
+            acceptSuggestionOnEnter: 'on' as const,
             acceptSuggestionOnCommitCharacter: true,
-            snippetSuggestions: 'top',
+            snippetSuggestions: 'top' as const,
             emptySelectionClipboard: false,
             mouseWheelZoom: true,
-            multiCursorModifier: 'ctrlCmd',
+            multiCursorModifier: 'ctrlCmd' as const,
             formatOnPaste: true,
             formatOnType: true,
             bracketPairColorization: {
               enabled: true
-            }
+            },
+            backgroundColor: 'transparent'
           }
         };
       case 'css':
@@ -67,35 +67,36 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           options: {
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
-            wordWrap: 'on',
+            wordWrap: 'on' as const,
             automaticLayout: true,
             fontSize: 14,
-            lineNumbers: 'on',
+            lineNumbers: 'on' as const,
             folding: true,
             lineDecorationsWidth: 0,
             lineNumbersMinChars: 0,
-            renderLineHighlight: 'none',
+            renderLineHighlight: 'none' as const,
             selectOnLineNumbers: true,
             roundedSelection: false,
             readOnly: false,
-            cursorStyle: 'line',
+            cursorStyle: 'line' as const,
             tabSize: 2,
             insertSpaces: true,
             detectIndentation: false,
             trimAutoWhitespace: true,
-            wordBasedSuggestions: 'off',
+            wordBasedSuggestions: 'off' as const,
             suggestOnTriggerCharacters: true,
-            acceptSuggestionOnEnter: 'on',
+            acceptSuggestionOnEnter: 'on' as const,
             acceptSuggestionOnCommitCharacter: true,
-            snippetSuggestions: 'top',
+            snippetSuggestions: 'top' as const,
             emptySelectionClipboard: false,
             mouseWheelZoom: true,
-            multiCursorModifier: 'ctrlCmd',
+            multiCursorModifier: 'ctrlCmd' as const,
             formatOnPaste: true,
             formatOnType: true,
             bracketPairColorization: {
               enabled: true
-            }
+            },
+            backgroundColor: 'transparent'
           }
         };
       case 'javascript':
@@ -105,35 +106,35 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           options: {
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
-            wordWrap: 'on',
+            wordWrap: 'on' as const,
             automaticLayout: true,
             fontSize: 14,
-            lineNumbers: 'on',
+            lineNumbers: 'on' as const,
             folding: true,
             lineDecorationsWidth: 0,
             lineNumbersMinChars: 0,
-            renderLineHighlight: 'none',
+            renderLineHighlight: 'none' as const,
             selectOnLineNumbers: true,
             roundedSelection: false,
             readOnly: false,
-            cursorStyle: 'line',
+            cursorStyle: 'line' as const,
             tabSize: 2,
             insertSpaces: true,
             detectIndentation: false,
             trimAutoWhitespace: true,
-            wordBasedSuggestions: 'on',
+            wordBasedSuggestions: 'matchingDocuments' as const,
             suggestOnTriggerCharacters: true,
-            acceptSuggestionOnEnter: 'on',
+            acceptSuggestionOnEnter: 'on' as const,
             acceptSuggestionOnCommitCharacter: true,
-            snippetSuggestions: 'top',
+            snippetSuggestions: 'top' as const,
             emptySelectionClipboard: false,
             mouseWheelZoom: true,
-            multiCursorModifier: 'ctrlCmd',
+            multiCursorModifier: 'ctrlCmd' as const,
             formatOnPaste: true,
             formatOnType: true,
             bracketPairColorization: {
               enabled: true
-            }
+            },
           }
         };
       default:
@@ -143,35 +144,35 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           options: {
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
-            wordWrap: 'on',
+            wordWrap: 'on' as const,
             automaticLayout: true,
             fontSize: 14,
-            lineNumbers: 'on',
+            lineNumbers: 'on' as const,
             folding: true,
             lineDecorationsWidth: 0,
             lineNumbersMinChars: 0,
-            renderLineHighlight: 'none',
+            renderLineHighlight: 'none' as const,
             selectOnLineNumbers: true,
             roundedSelection: false,
             readOnly: false,
-            cursorStyle: 'line',
+            cursorStyle: 'line' as const,
             tabSize: 2,
             insertSpaces: true,
             detectIndentation: false,
             trimAutoWhitespace: true,
-            wordBasedSuggestions: 'off',
+            wordBasedSuggestions: 'off' as const,
             suggestOnTriggerCharacters: true,
-            acceptSuggestionOnEnter: 'on',
+            acceptSuggestionOnEnter: 'on' as const,
             acceptSuggestionOnCommitCharacter: true,
-            snippetSuggestions: 'top',
+            snippetSuggestions: 'top' as const,
             emptySelectionClipboard: false,
             mouseWheelZoom: true,
-            multiCursorModifier: 'ctrlCmd',
+            multiCursorModifier: 'ctrlCmd' as const,
             formatOnPaste: true,
             formatOnType: true,
             bracketPairColorization: {
               enabled: true
-            }
+            },
           }
         };
     }
@@ -180,7 +181,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const config = getLanguageConfig(language);
 
   return (
-    <div className="border border-gray-300 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg overflow-hidden pl-2 py-2">
       <Editor
         height={height}
         language={config.language}
@@ -189,7 +190,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         onChange={handleEditorChange}
         options={config.options}
         loading={
-          <div className="flex items-center justify-center h-full bg-gray-50">
+          <div className="flex items-center justify-center h-full bg-gray-100">
             <div className="text-gray-500">加载编辑器中...</div>
           </div>
         }
