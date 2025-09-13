@@ -7,26 +7,31 @@ import { useAuth } from '../contexts/AuthContext';
 interface ComponentCardProps {
   component: ComponentItem;
   onEdit?: (component: ComponentItem) => void;
+  onDetail?: (component: ComponentItem) => void;
 }
 
 function getCategoryStyle(category: string) {
   const styles = {
-    'style': { background: '#f0f9ff', color: '#3b82f6' },
-    'animation': { background: '#fffbeb', color: '#f59e0b' },
-    'interaction': { background: '#f0fdf4', color: '#16a34a' },
-    'copywriting': { background: '#fdf2f8', color: '#ec4899' },
-    'other': { background: '#f0fdf4', color: '#16a34a' },
-    default: { background: '#f0fdf4', color: '#16a34a' }
+    style: { background: "#f0f9ff", color: "#3b82f6" },
+    animation: { background: "#fffbeb", color: "#f59e0b" },
+    interaction: { background: "#f0fdf4", color: "#16a34a" },
+    copywriting: { background: "#fdf2f8", color: "#ec4899" },
+    other: { background: "#f0fdf4", color: "#16a34a" },
+    default: { background: "#f0fdf4", color: "#16a34a" },
   };
 
   return styles[category as keyof typeof styles] || styles.default;
 }
 
-export default function ComponentCard({ component, onEdit }: ComponentCardProps) {
+export default function ComponentCard({
+  component,
+  onEdit,
+  onDetail,
+}: ComponentCardProps) {
   const { user } = useAuth();
   const categoryStyle = getCategoryStyle(component.category);
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
 
   // 检查当前用户是否是组件的创建者
   const isOwner = user && user.id === component.user_id;
@@ -34,25 +39,34 @@ export default function ComponentCard({ component, onEdit }: ComponentCardProps)
   const fetchUserInfo = async (userId: string) => {
     try {
       const user = await getUserInfo(userId);
-      
+
       if (user) {
-        setUsername(user.username || 'Unknown User');
-        setAvatarUrl(user.avatar_url || '');
+        setUsername(user.username || "Unknown User");
+        setAvatarUrl(user.avatar_url || "");
       } else {
-        setUsername('Unknown User');
-        setAvatarUrl('');
+        setUsername("Unknown User");
+        setAvatarUrl("");
       }
     } catch (error) {
-      console.error('Error fetching user info:', error);
-      setUsername('Unknown User');
-      setAvatarUrl('');
+      console.error("Error fetching user info:", error);
+      setUsername("Unknown User");
+      setAvatarUrl("");
     }
   };
   useEffect(() => {
     fetchUserInfo(component.user_id);
   }, [component.user_id]);
+  const handleCardClick = () => {
+    if (onDetail) {
+      onDetail(component);
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-4 h-full border border-gray-100 rounded-[16px] p-4 transition-shadow transition-transform duration-300 cursor-pointer">
+    <div
+      className="flex flex-col gap-4 h-full border border-gray-100 rounded-[16px] p-4 transition-shadow transition-transform duration-300 cursor-pointer hover:shadow-lg hover:border-gray-200"
+      onClick={handleCardClick}
+    >
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -61,7 +75,9 @@ export default function ComponentCard({ component, onEdit }: ComponentCardProps)
               <a
                 href={component.origin_link}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-400 text-sm hover:text-gray-800 transition-colors duration-300"
+                onClick={(e) => e.stopPropagation()}
               >
                 <svg
                   width="20"
