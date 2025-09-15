@@ -47,8 +47,8 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
       },
       contextmenu: false, // 禁用右键菜单
       scrollbar: {
-        vertical: 'auto',
-        horizontal: 'auto',
+        vertical: 'auto' as const,
+        horizontal: 'auto' as const,
         verticalScrollbarSize: 8,
         horizontalScrollbarSize: 8
       },

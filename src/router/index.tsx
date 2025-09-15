@@ -40,7 +40,9 @@ const router = createBrowserRouter([
       }
     ]
   }
-]);
+], {
+  basename: process.env.NODE_ENV === 'production' ? '/insignificant-elements' : '/'
+});
 
 export default function Router() {
   return <RouterProvider router={router} />;
