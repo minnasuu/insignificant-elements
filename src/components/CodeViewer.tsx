@@ -88,7 +88,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   const config = getLanguageConfig(language);
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+    <div className="py-2 border border-gray-200 rounded-[16px] overflow-hidden w-full">
       <Editor
         height={height}
         language={config.language}
@@ -96,7 +96,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
         value={value}
         options={config.options}
         loading={
-          <div className="flex items-center justify-center h-full bg-gray-50">
+          <div className="flex items-center justify-center h-full">
             <div className="text-gray-500 text-sm">加载代码中...</div>
           </div>
         }

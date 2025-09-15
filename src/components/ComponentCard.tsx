@@ -64,7 +64,7 @@ export default function ComponentCard({
 
   return (
     <div
-      className="flex flex-col gap-4 h-full border border-gray-100 rounded-[16px] p-4 transition-shadow transition-transform duration-300 cursor-pointer hover:shadow-lg hover:border-gray-200"
+      className="flex flex-col gap-4 h-full border border-gray-200 rounded-[16px] p-4 transition-box-shadow duration-300 cursor-pointer hover:shadow-lg hover:border-gray-200"
       onClick={handleCardClick}
     >
       <div className="flex-1 flex flex-col gap-2">
