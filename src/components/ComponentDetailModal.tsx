@@ -190,7 +190,7 @@ export default function ComponentDetailModal({
               {component.html && (
                 <div className="flex-1 flex-shrink-0">
                   <LandAffixContainer
-                    className="w-full p-"
+                    className="w-full"
                     rbOption={{
                       content: (
                         <button

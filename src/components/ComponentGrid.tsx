@@ -27,7 +27,7 @@ export default function ComponentGrid({
   return (
     <main className="px-4 py-6">
       <div
-        className="grid gap-4"
+        className="grid gap-4 max-w-7xl mx-auto"
         style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}
       >
         {components.map((component) => (
