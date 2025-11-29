@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import ComponentRenderer from './ComponentRenderer';
 import CodeViewer from './CodeViewer';
 import type { ComponentItem } from '../types';
-import { getUserInfo } from '../services/userService';
 import { LandAffixContainer, LandDialog } from "@suminhan/land-design";
 
 interface ComponentDetailModalProps {
@@ -33,8 +32,6 @@ export default function ComponentDetailModal({
   components = [],
   onNavigate,
 }: ComponentDetailModalProps) {
-  const [avatarUrl, setAvatarUrl] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
   const [copySuccess, setCopySuccess] = useState<{ [key: string]: boolean }>(
     {}
   );
@@ -77,30 +74,6 @@ export default function ComponentDetailModal({
     const currentIndex = getCurrentIndex();
     return currentIndex !== -1 && currentIndex < components.length - 1;
   };
-
-  const fetchUserInfo = async (userId: string) => {
-    try {
-      const user = await getUserInfo(userId);
-
-      if (user) {
-        setUsername(user.username || "Unknown User");
-        setAvatarUrl(user.avatar_url || "");
-      } else {
-        setUsername("Unknown User");
-        setAvatarUrl("");
-      }
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-      setUsername("Unknown User");
-      setAvatarUrl("");
-    }
-  };
-
-  useEffect(() => {
-    if (component?.user_id) {
-      fetchUserInfo(component.user_id);
-    }
-  }, [component?.user_id]);
 
   // 监听键盘事件
   useEffect(() => {
@@ -411,34 +384,6 @@ export default function ComponentDetailModal({
         <div className="flex-1 height-1 flex items-end justify-between px-6 pt-4 border-t border-gray-100">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-gray-100">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={username || "User"}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = "none";
-                        const parent = target.parentElement;
-                        if (parent) {
-                          parent.innerHTML = `<span class="text-sm text-gray-500 font-medium">${
-                            username?.charAt(0).toUpperCase() || "U"
-                          }</span>`;
-                        }
-                      }}
-                    />
-                  ) : (
-                    <span className="text-sm text-gray-500 font-medium">
-                      {username?.charAt(0).toUpperCase() || "U"}
-                    </span>
-                  )}
-                </div>
-                <p className="text-gray-900 font-medium">
-                  {username || "Unknown User"}
-                </p>
-              </div>
               <p className="text-gray-500 text-sm">
                 {new Date(component.created_at).toLocaleDateString("zh-CN", {
                   year: "numeric",

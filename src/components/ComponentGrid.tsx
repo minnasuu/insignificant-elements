@@ -5,14 +5,12 @@ import type { ComponentItem } from '../types';
 interface ComponentGridProps {
   components: ComponentItem[];
   selectedCategory: string;
-  onEdit?: (component: ComponentItem) => void;
   onDetail?: (component: ComponentItem) => void;
 }
 
 export default function ComponentGrid({
   components,
   selectedCategory,
-  onEdit,
   onDetail,
 }: ComponentGridProps) {
   // 如果没有组件，显示空状态
@@ -34,7 +32,6 @@ export default function ComponentGrid({
           <ComponentCard
             key={component.id}
             component={component}
-            onEdit={onEdit}
             onDetail={onDetail}
           />
         ))}
