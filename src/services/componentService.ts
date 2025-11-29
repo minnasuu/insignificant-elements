@@ -351,7 +351,7 @@ export async function getComponentsByCategory(category: string): Promise<Compone
 }
 
 // 获取用户上传的组件（静态版本返回空数组）
-export async function getUserComponents(userId: string): Promise<ComponentItem[]> {
+export async function getUserComponents(_userId: string): Promise<ComponentItem[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([]);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getComponents, getComponentsByCategory, getUserComponents } from '../services/componentService';
+import { getComponents, getComponentsByCategory } from '../services/componentService';
 import type { ComponentItem } from '../types';
 
 export function useComponents() {
